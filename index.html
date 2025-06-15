@@ -230,6 +230,10 @@
         
         document.getElementById('login-form').addEventListener('submit', (e) => {
             e.preventDefault();
+            if (!appState.settings) { 
+                showNotification('Datos de configuración aún cargando, por favor espere.', true);
+                return;
+            }
             if (document.getElementById('password').value === appState.settings.password) {
                 sessionStorage.setItem('isAdminPeluqueria', 'true');
                 showAdminView();
@@ -465,7 +469,9 @@
                 const timeStr = currentTime.toTimeString().substring(0, 5);
                 html += `<div class="agenda-time text-right pr-2 border-r border-gray-200 text-sm text-gray-500">${timeStr}</div>`;
                 staff.forEach(person => {
-                    const appointment = Object.values(dailyAppointments).find(apt => apt.staffName === person.name && apt.startTime === timeStr);
+                    const appointmentKey = Object.keys(dailyAppointments).find(key => dailyAppointments[key].staffName === person.name && dailyAppointments[key].startTime === timeStr);
+                    const appointment = appointmentKey ? {id: appointmentKey, ...dailyAppointments[appointmentKey]} : null;
+
                     html += `<div class="agenda-slot border-r border-b border-gray-200 p-2">`;
                     if (appointment) {
                         let noteHTML = '';
@@ -551,7 +557,7 @@
                 showConfirm('Eliminar Cita', '¿Estás seguro de que quieres eliminar esta cita? Esta acción no se puede deshacer.', (confirmed) => {
                     if (confirmed) {
                         const { date, id } = target.dataset;
-                        const appointmentKey = Object.keys(appState.appointments[date]).find(key => appState.appointments[date][key].id == id);
+                        const appointmentKey = Object.keys(appState.appointments[date] || {}).find(key => appState.appointments[date][key].id == id);
                         if (appointmentKey) {
                             appointmentsRef.child(date).child(appointmentKey).remove();
                             showNotification('Cita eliminada');
@@ -678,7 +684,7 @@
 
                 appointmentsRef.on('value', (snapshot) => {
                     appState.appointments = snapshot.val() || {};
-                    if (document.getElementById('admin-view').offsetParent !== null) {
+                    if (adminView.offsetParent !== null) {
                          const activeTab = document.querySelector('.admin-tab.active');
                          if (activeTab && activeTab.dataset.tab === 'agenda') {
                             const datePicker = document.getElementById('admin-date-picker');
@@ -734,21 +740,13 @@
                 }
                 const logoutBtn = e.target.closest('#logout-btn');
                 if(logoutBtn){
-                    // Delegar el evento al botón original para mantener una sola lógica de logout
-                    document.getElementById('logout-btn').click();
+                    handleLogout();
                 }
             });
         };
 
-        document.getElementById('confirm-ok-btn').addEventListener('click', () => {
-            if(confirmCallback) confirmCallback(true);
-            document.getElementById('confirm-modal').classList.add('hidden');
-        });
-         document.getElementById('confirm-cancel-btn').addEventListener('click', () => {
-            if(confirmCallback) confirmCallback(false);
-            document.getElementById('confirm-modal').classList.add('hidden');
-        });
-        
+        desktopLogoutBtn.addEventListener('click', handleLogout);
+
         document.getElementById('admin-tabs-nav').addEventListener('click', (e) => {
             e.preventDefault();
             const tab = e.target.closest('.admin-tab');
@@ -759,6 +757,15 @@
             if (e.target.id === 'admin-date-picker') {
                 renderAdminAgenda(document.getElementById('admin-content'), e.target.value);
             }
+        });
+
+        document.getElementById('confirm-ok-btn').addEventListener('click', () => {
+            if(confirmCallback) confirmCallback(true);
+            document.getElementById('confirm-modal').classList.add('hidden');
+        });
+         document.getElementById('confirm-cancel-btn').addEventListener('click', () => {
+            if(confirmCallback) confirmCallback(false);
+            document.getElementById('confirm-modal').classList.add('hidden');
         });
 
         initializeApp();
