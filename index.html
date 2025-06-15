@@ -728,8 +728,7 @@
                 }
                 const logoutBtn = e.target.closest('#logout-btn');
                 if(logoutBtn){
-                    sessionStorage.removeItem('isAdminPeluqueria');
-                    window.location.reload();
+                    logoutBtn.click(); // delega el evento al botón original
                 }
             });
         };
@@ -741,6 +740,11 @@
          document.getElementById('confirm-cancel-btn').addEventListener('click', () => {
             if(confirmCallback) confirmCallback(false);
             document.getElementById('confirm-modal').classList.add('hidden');
+        });
+        
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            sessionStorage.removeItem('isAdminPeluqueria');
+            window.location.reload();
         });
 
         initializeApp();
