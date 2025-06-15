@@ -30,8 +30,8 @@
         .time-slot:not(.disabled):hover { transform: scale(1.05); background-color: var(--primary-pink); color: var(--white); border-color: var(--primary-pink); }
         .time-slot.selected { background-color: var(--dark-accent); color: var(--white); border-color: var(--dark-accent); }
         .time-slot.disabled { background-color: #e5e7eb; color: #9ca3af; cursor: not-allowed; }
-        .admin-sidebar { background-color: var(--white); color: #374151; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .admin-sidebar-mobile { transition: transform 0.3s ease-in-out; }
+        .admin-sidebar-desktop { background-color: var(--white); color: #374151; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .admin-sidebar-mobile { transition: transform 0.3s ease-in-out; background-color: var(--white); color: #374151; }
         .admin-tab { color: #4B5563; }
         .admin-tab.active { background-color: var(--primary-pink); color: var(--white); }
         .admin-tab:hover:not(.active) { background-color: var(--soft-gray); }
@@ -86,12 +86,12 @@
         <div class="flex min-h-screen bg-gray-100">
             <!-- Sidebar para móvil -->
             <div id="mobile-sidebar-backdrop" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden md:hidden"></div>
-            <div id="mobile-sidebar" class="admin-sidebar-mobile bg-white fixed top-0 left-0 w-64 h-full z-30 transform -translate-x-full transition-transform duration-300 ease-in-out md:hidden">
+            <div id="mobile-sidebar" class="admin-sidebar-mobile fixed top-0 left-0 w-64 h-full z-30 transform -translate-x-full md:hidden">
                 <!-- Contenido del sidebar móvil se inyectará aquí -->
             </div>
 
             <!-- Sidebar para desktop -->
-            <aside class="admin-sidebar w-64 flex-shrink-0 flex-col hidden md:flex">
+            <aside class="admin-sidebar-desktop w-64 flex-shrink-0 flex-col hidden md:flex">
                 <div class="text-center py-6 border-b border-gray-200">
                     <h2 class="text-2xl font-display font-bold text-[var(--dark-accent)]">Panel Mágico</h2>
                 </div>
@@ -223,6 +223,7 @@
         const mobileSidebar = document.getElementById('mobile-sidebar');
         const mobileSidebarBackdrop = document.getElementById('mobile-sidebar-backdrop');
         const openMenuBtn = document.getElementById('open-menu-btn');
+        const desktopLogoutBtn = document.getElementById('logout-btn');
 
         document.getElementById('open-login-btn').addEventListener('click', () => loginModal.classList.remove('hidden'));
         loginModal.addEventListener('click', (e) => { if (e.target === loginModal) loginModal.classList.add('hidden'); });
@@ -237,6 +238,11 @@
                 showNotification('Contraseña incorrecta', true);
             }
         });
+
+        const handleLogout = () => {
+            sessionStorage.removeItem('isAdminPeluqueria');
+            window.location.reload();
+        };
 
         const showAdminView = () => {
             mainView.classList.add('hidden');
@@ -428,10 +434,10 @@
 
         const renderAdminView = (tabName) => {
              document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
-             document.querySelector(`.admin-sidebar-desktop .admin-tab[data-tab="${tabName}"]`).classList.add('active');
-             if (mobileSidebar.querySelector(`.admin-tab[data-tab="${tabName}"]`)) {
-                 mobileSidebar.querySelector(`.admin-tab[data-tab="${tabName}"]`).classList.add('active');
-             }
+             const desktopTab = document.querySelector(`.admin-sidebar-desktop .admin-tab[data-tab="${tabName}"]`);
+             if (desktopTab) desktopTab.classList.add('active');
+             const mobileTab = mobileSidebar.querySelector(`.admin-tab[data-tab="${tabName}"]`);
+             if (mobileTab) mobileTab.classList.add('active');
 
              const content = document.getElementById('admin-content');
              if (tabName === 'agenda') renderAdminAgenda(content);
@@ -672,7 +678,7 @@
 
                 appointmentsRef.on('value', (snapshot) => {
                     appState.appointments = snapshot.val() || {};
-                    if (adminView.offsetParent !== null) {
+                    if (document.getElementById('admin-view').offsetParent !== null) {
                          const activeTab = document.querySelector('.admin-tab.active');
                          if (activeTab && activeTab.dataset.tab === 'agenda') {
                             const datePicker = document.getElementById('admin-date-picker');
@@ -728,7 +734,8 @@
                 }
                 const logoutBtn = e.target.closest('#logout-btn');
                 if(logoutBtn){
-                    logoutBtn.click(); // delega el evento al botón original
+                    // Delegar el evento al botón original para mantener una sola lógica de logout
+                    document.getElementById('logout-btn').click();
                 }
             });
         };
@@ -742,9 +749,16 @@
             document.getElementById('confirm-modal').classList.add('hidden');
         });
         
-        document.getElementById('logout-btn').addEventListener('click', () => {
-            sessionStorage.removeItem('isAdminPeluqueria');
-            window.location.reload();
+        document.getElementById('admin-tabs-nav').addEventListener('click', (e) => {
+            e.preventDefault();
+            const tab = e.target.closest('.admin-tab');
+            if (tab) { renderAdminView(tab.dataset.tab); }
+        });
+
+        document.getElementById('admin-view').addEventListener('change', (e) => {
+            if (e.target.id === 'admin-date-picker') {
+                renderAdminAgenda(document.getElementById('admin-content'), e.target.value);
+            }
         });
 
         initializeApp();
