@@ -30,7 +30,7 @@
         .time-slot:not(.disabled):hover { transform: scale(1.05); background-color: var(--primary-pink); color: var(--white); border-color: var(--primary-pink); }
         .time-slot.selected { background-color: var(--dark-accent); color: var(--white); border-color: var(--dark-accent); }
         .time-slot.disabled { background-color: #e5e7eb; color: #9ca3af; cursor: not-allowed; }
-        .admin-sidebar-desktop { background-color: var(--white); color: #374151; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .admin-sidebar { background-color: var(--white); color: #374151; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
         .admin-sidebar-mobile { transition: transform 0.3s ease-in-out; background-color: var(--white); color: #374151; }
         .admin-tab { color: #4B5563; }
         .admin-tab.active { background-color: var(--primary-pink); color: var(--white); }
@@ -39,6 +39,10 @@
         .agenda-time { grid-column: 1 / 2; }
         .agenda-slot { min-height: 100px; }
         .note-card { background-color: #FFFBEB; border-left: 3px solid #FBBF24; }
+        /* Estilos para el nuevo acordeón */
+        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
+        .accordion-button .accordion-arrow { transition: transform 0.3s ease; }
+        .accordion-button.active .accordion-arrow { transform: rotate(180deg); }
     </style>
 </head>
 <body class="text-gray-800">
@@ -55,7 +59,7 @@
             <div id="booking-steps" class="space-y-10">
                 <div>
                     <h2 class="text-2xl font-display mb-4 border-l-4 border-[var(--primary-pink)] pl-4">1. Elige un servicio</h2>
-                    <div id="services-list" class="space-y-6"></div>
+                    <div id="services-list" class="space-y-3"></div>
                 </div>
                 <div id="date-time-step" class="hidden">
                     <h2 class="text-2xl font-display mb-4 border-l-4 border-[var(--primary-pink)] pl-4">2. Elige fecha y hora</h2>
@@ -91,7 +95,7 @@
             </div>
 
             <!-- Sidebar para desktop -->
-            <aside class="admin-sidebar-desktop w-64 flex-shrink-0 flex-col hidden md:flex">
+            <aside class="admin-sidebar w-64 flex-shrink-0 flex-col hidden md:flex">
                 <div class="text-center py-6 border-b border-gray-200">
                     <h2 class="text-2xl font-display font-bold text-[var(--dark-accent)]">Panel Mágico</h2>
                 </div>
@@ -283,14 +287,33 @@
 
             for (const category in servicesByCategory) {
                 const categoryWrapper = document.createElement('div');
-                let categoryHTML = `<h3 class="text-xl font-display font-bold text-gray-700 mb-3">${category}</h3><div class="space-y-3">`;
+                categoryWrapper.className = 'accordion-item bg-white rounded-xl shadow-lg';
+                let categoryHTML = `
+                    <button class="accordion-button w-full flex justify-between items-center p-5 text-left">
+                        <h3 class="text-xl font-display font-bold text-gray-800">${category}</h3>
+                        <i class="fas fa-chevron-down accordion-arrow text-[var(--primary-pink)] transition-transform duration-300"></i>
+                    </button>
+                    <div class="accordion-content px-5 pb-5">
+                        <div class="border-t pt-4 space-y-3">`;
                 servicesByCategory[category].forEach(service => {
-                    categoryHTML += `<div class="service-card bg-white p-4 rounded-xl shadow-lg cursor-pointer flex justify-between items-center transform hover:-translate-y-1 transition-transform duration-300" data-service-id="${service.id}"><div><h4 class="font-bold text-md text-gray-800">${service.name}</h4><p class="text-sm text-gray-500">${service.duration} min.</p></div><i class="fas fa-chevron-right text-[var(--primary-pink)]"></i></div>`;
+                    categoryHTML += `<div class="service-card cursor-pointer flex justify-between items-center p-3 rounded-lg hover:bg-gray-100" data-service-id="${service.id}"><div><h4 class="font-bold text-md text-gray-800">${service.name}</h4><p class="text-sm text-gray-500">${service.duration} min.</p></div></div>`;
                 });
-                categoryHTML += `</div>`;
+                categoryHTML += `</div></div>`;
                 categoryWrapper.innerHTML = categoryHTML;
                 list.appendChild(categoryWrapper);
             }
+
+            document.querySelectorAll('.accordion-button').forEach(button => {
+                button.addEventListener('click', () => {
+                    const content = button.nextElementSibling;
+                    button.classList.toggle('active');
+                    if (content.style.maxHeight) {
+                        content.style.maxHeight = null;
+                    } else {
+                        content.style.maxHeight = content.scrollHeight + "px";
+                    } 
+                });
+            });
 
             document.querySelectorAll('.service-card').forEach(card => {
                 card.addEventListener('click', (e) => {
@@ -479,7 +502,7 @@
                             const truncatedNote = appointment.notes.length > 35 ? appointment.notes.substring(0, 35) + '...' : appointment.notes;
                             noteHTML = `<div class="note-card mt-2 p-1.5 text-xs"><i class="fas fa-thumbtack mr-1 text-yellow-500"></i> ${truncatedNote}</div>`;
                         }
-                        html += `<div class="bg-pink-50 text-pink-900 rounded-lg p-2 text-sm h-full flex flex-col justify-between border-l-4 border-pink-400"><div><p class="font-bold text-black">${appointment.clientName}</p><p class="text-gray-700">${appointment.serviceName}</p><p class="text-xs mt-1 text-gray-500"><i class="fab fa-whatsapp"></i> ${appointment.clientPhone}</p>${noteHTML}</div><button data-date="${selectedDateStr}" data-id="${appointment.id}" class="delete-appointment-btn text-red-500 self-end opacity-50 hover:opacity-100 text-xs"><i class="fas fa-trash"></i></button></div>`;
+                        html += `<div class="bg-pink-50 text-pink-900 rounded-lg p-2 text-sm h-full flex flex-col justify-between border-l-4 border-pink-400"><div><p class="font-bold text-black">${appointment.clientName}</p><p class="text-gray-700">${appointment.serviceName}</p><p class="text-xs mt-1 text-gray-500"><i class="fab fa-whatsapp"></i> ${appointment.clientPhone}</p>${noteHTML}</div><button data-date="${selectedDateStr}" data-id="${appointmentKey}" class="delete-appointment-btn text-red-500 self-end opacity-50 hover:opacity-100 text-xs"><i class="fas fa-trash"></i></button></div>`;
                     } else {
                          html += `<button data-date="${selectedDateStr}" data-time="${timeStr}" data-staff="${person.name}" class="add-appointment-btn w-full h-full flex items-center justify-center text-gray-300 hover:text-green-500 hover:bg-green-50 rounded-lg transition-colors"><i class="fas fa-plus"></i></button>`;
                     }
@@ -557,11 +580,8 @@
                 showConfirm('Eliminar Cita', '¿Estás seguro de que quieres eliminar esta cita? Esta acción no se puede deshacer.', (confirmed) => {
                     if (confirmed) {
                         const { date, id } = target.dataset;
-                        const appointmentKey = Object.keys(appState.appointments[date] || {}).find(key => appState.appointments[date][key].id == id);
-                        if (appointmentKey) {
-                            appointmentsRef.child(date).child(appointmentKey).remove();
-                            showNotification('Cita eliminada');
-                        }
+                        appointmentsRef.child(date).child(id).remove();
+                        showNotification('Cita eliminada');
                     }
                 });
             } else if (target.classList.contains('add-appointment-btn')) {
