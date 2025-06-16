@@ -4,12 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agenda de Citas - La Casa Mágica</title>
-    <!-- Librerías Externas -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- SDK de Firebase -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
@@ -17,7 +15,7 @@
         :root {
             --primary-pink: #E54B9A;
             --dark-accent: #1F2937; 
-            --light-bg: #F9FAFB;    
+            --light-bg: #F9FAFB;   
             --white: #FFFFFF;
             --soft-gray: #F3F4F6;
         }
@@ -39,7 +37,6 @@
         .agenda-time { grid-column: 1 / 2; }
         .agenda-slot { min-height: 100px; }
         .note-card { background-color: #FFFBEB; border-left: 3px solid #FBBF24; }
-        /* Estilos para el nuevo acordeón */
         .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
         .accordion-button .accordion-arrow { transition: transform 0.3s ease; }
         .accordion-button.active .accordion-arrow { transform: rotate(180deg); }
@@ -47,7 +44,6 @@
 </head>
 <body class="text-gray-800">
 
-    <!-- === VISTA PRINCIPAL (CLIENTE Y LOGIN DE ADMIN) === -->
     <div id="main-view">
         <div id="client-view" class="max-w-2xl mx-auto p-4 md:p-8">
             <header class="text-center mb-10">
@@ -85,16 +81,12 @@
         </div>
     </div>
 
-    <!-- === VISTA DE ADMINISTRADOR === -->
     <div id="admin-view" class="hidden">
         <div class="flex min-h-screen bg-gray-100">
-            <!-- Sidebar para móvil -->
             <div id="mobile-sidebar-backdrop" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden md:hidden"></div>
             <div id="mobile-sidebar" class="admin-sidebar-mobile fixed top-0 left-0 w-64 h-full z-30 transform -translate-x-full md:hidden">
-                <!-- Contenido del sidebar móvil se inyectará aquí -->
-            </div>
+                </div>
 
-            <!-- Sidebar para desktop -->
             <aside class="admin-sidebar w-64 flex-shrink-0 flex-col hidden md:flex">
                 <div class="text-center py-6 border-b border-gray-200">
                     <h2 class="text-2xl font-display font-bold text-[var(--dark-accent)]">Panel Mágico</h2>
@@ -105,6 +97,7 @@
                     <a href="#" data-tab="servicios" class="admin-tab flex items-center px-4 py-3 rounded-lg"><i class="fas fa-wand-magic-sparkles w-6 mr-3"></i>Servicios</a>
                     <a href="#" data-tab="equipo" class="admin-tab flex items-center px-4 py-3 rounded-lg"><i class="fas fa-users w-6 mr-3"></i>Equipo</a>
                     <a href="#" data-tab="horarios" class="admin-tab flex items-center px-4 py-3 rounded-lg"><i class="fas fa-business-time w-6 mr-3"></i>Horarios</a>
+                    <a href="#" data-tab="password" class="admin-tab flex items-center px-4 py-3 rounded-lg"><i class="fas fa-key w-6 mr-3"></i>Contraseña</a>
                 </nav>
                 <div class="px-4 py-4 border-t border-gray-200">
                     <button id="logout-btn" class="w-full bg-red-600 text-white py-2 rounded-lg font-bold hover:bg-red-700"><i class="fas fa-sign-out-alt mr-2"></i>Cerrar Sesión</button>
@@ -114,7 +107,7 @@
             <div class="flex-1 flex flex-col">
                 <header class="md:hidden flex justify-between items-center p-4 bg-white shadow-md">
                      <button id="open-menu-btn" class="text-2xl text-gray-700">
-                        <i class="fas fa-bars"></i>
+                         <i class="fas fa-bars"></i>
                     </button>
                     <h2 class="text-xl font-bold text-[var(--primary-pink)]">La Casa Mágica</h2>
                     <div class="w-8"></div>
@@ -126,7 +119,6 @@
         </div>
     </div>
 
-    <!-- === MODALES === -->
     <div id="login-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center modal-backdrop p-4">
         <div class="bg-white p-8 rounded-lg shadow-2xl w-full max-w-sm">
             <div class="text-center mb-6">
@@ -163,13 +155,44 @@
     <div id="confirm-modal" class="hidden fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center modal-backdrop p-4">
         <div class="bg-white p-8 rounded-lg shadow-2xl w-full max-w-md text-center">
              <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 mb-4">
-                <i id="confirm-icon" class="fas fa-exclamation-triangle text-yellow-500 text-2xl"></i>
+                 <i id="confirm-icon" class="fas fa-exclamation-triangle text-yellow-500 text-2xl"></i>
             </div>
             <h2 id="confirm-title" class="text-2xl font-bold mb-2"></h2>
             <p id="confirm-message" class="text-gray-600 mb-6"></p>
             <div class="flex justify-center gap-4">
                 <button id="confirm-cancel-btn" class="bg-gray-300 px-6 py-2 rounded-lg font-semibold">Cancelar</button>
                 <button id="confirm-ok-btn" class="btn-primary px-6 py-2 rounded-lg font-semibold">Aceptar</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="password-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center modal-backdrop p-4">
+        <div class="bg-white p-8 rounded-lg shadow-2xl w-full max-w-md">
+            <h3 class="text-2xl font-display font-bold mb-6 text-gray-800">Cambiar Contraseña de Acceso</h3>
+            <form id="form-password" class="space-y-4">
+                <div>
+                    <label for="new-password" class="block text-sm font-medium text-gray-700">Nueva Contraseña</label>
+                    <div class="relative mt-1">
+                        <input type="password" id="new-password" class="w-full p-3 rounded-lg border border-gray-300 shadow-sm pr-10" required>
+                        <span class="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer toggle-password">
+                            <i class="fas fa-eye text-gray-400"></i>
+                        </span>
+                    </div>
+                </div>
+                <div>
+                    <label for="confirm-password" class="block text-sm font-medium text-gray-700">Confirmar Nueva Contraseña</label>
+                    <div class="relative mt-1">
+                        <input type="password" id="confirm-password" class="w-full p-3 rounded-lg border border-gray-300 shadow-sm pr-10" required>
+                        <span class="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer toggle-password">
+                             <i class="fas fa-eye text-gray-400"></i>
+                        </span>
+                    </div>
+                </div>
+                <p id="password-error" class="text-red-500 text-sm hidden"></p>
+            </form>
+            <div class="flex justify-end items-center mt-6 space-x-4">
+                <button id="cancel-password-btn" class="bg-gray-300 px-6 py-2 rounded-lg font-semibold">Cancelar</button>
+                <button id="save-password-btn" class="btn-primary px-6 py-2 rounded-lg font-semibold">Guardar Cambios</button>
             </div>
         </div>
     </div>
@@ -182,13 +205,13 @@
         // CONFIGURACIÓN DE FIREBASE 
         // =========================================================================
         const firebaseConfig = {
-          apiKey: "AIzaSyB1V6cCuFUWqVPpx2LX1KKuoU1ikDkFjcw",
-          authDomain: "agenda-casa-magica.firebaseapp.com",
-          databaseURL: "https://agenda-casa-magica-default-rtdb.firebaseio.com",
-          projectId: "agenda-casa-magica",
-          storageBucket: "agenda-casa-magica.appspot.com",
-          messagingSenderId: "733679225840",
-          appId: "1:733679225840:web:cb02ebb1b0d040104bab35"
+         apiKey: "AIzaSyB1V6cCuFUWqVPpx2LX1KKuoU1ikDkFjcw",
+         authDomain: "agenda-casa-magica.firebaseapp.com",
+         databaseURL: "https://agenda-casa-magica-default-rtdb.firebaseio.com",
+         projectId: "agenda-casa-magica",
+         storageBucket: "agenda-casa-magica.appspot.com",
+         messagingSenderId: "733679225840",
+         appId: "1:733679225840:web:cb02ebb1b0d040104bab35"
         };
         // =========================================================================
 
@@ -472,6 +495,8 @@
              else if (tabName === 'servicios') renderAdminServices(content);
              else if (tabName === 'equipo') renderAdminStaff(content);
              else if (tabName === 'horarios') renderAdminHours(content);
+             // AÑADIDO: Renderizado para la nueva pestaña de contraseña
+             else if (tabName === 'password') renderAdminPassword(content);
         };
 
         const renderAdminAgenda = (container, date) => {
@@ -519,7 +544,7 @@
             html += `<div class="bg-white p-6 rounded-lg shadow mb-8"><h3 class="font-semibold text-xl mb-4">Añadir Nueva Categoría</h3><form id="form-add-category" class="flex gap-4 items-end">
                         <input type="text" id="new-category-name" placeholder="Ej: Depilación, Masajes..." class="w-full p-2 border rounded" required>
                         <button type="submit" class="btn-primary py-2 px-4 rounded">Añadir</button>
-                     </form></div>`;
+                       </form></div>`;
             html += `<div class="bg-white p-6 rounded-lg shadow"><h3 class="font-semibold text-xl mb-4">Categorías Actuales</h3><div id="categories-admin-list" class="space-y-3"></div></div>`;
             container.innerHTML = html;
             
@@ -536,7 +561,7 @@
                         <select id="new-service-category" class="w-full p-2 border rounded" required>${(appState.settings.serviceCategories || []).map(c => `<option value="${c}">${c}</option>`).join('')}</select>
                         <input type="number" id="new-service-duration" placeholder="Duración (min)" class="w-full p-2 border rounded" required>
                         <button type="submit" class="btn-primary py-2 px-4 rounded md:col-span-3">Añadir Servicio</button>
-                     </form></div>`;
+                       </form></div>`;
             html += `<div class="bg-white p-6 rounded-lg shadow"><h3 class="font-semibold text-xl mb-4">Servicios Actuales</h3><div id="services-admin-list" class="space-y-4"></div></div>`;
             container.innerHTML = html;
             
@@ -556,7 +581,7 @@
                         <input type="text" id="new-staff-name" placeholder="Nombre" class="w-full p-2 border rounded" required>
                         <div><p class="font-medium mb-2">Especialidades:</p><div id="new-staff-specialties" class="grid grid-cols-2 gap-2">${(appState.settings.serviceCategories || []).map(c => `<div><input type="checkbox" id="spec-${c}" value="${c}" class="mr-2"><label for="spec-${c}">${c}</label></div>`).join('')}</div></div>
                         <button type="submit" class="btn-primary py-2 px-4 rounded">Añadir al Equipo</button>
-                     </form></div>`;
+                       </form></div>`;
             html += `<div class="bg-white p-6 rounded-lg shadow"><h3 class="font-semibold text-xl mb-4">Equipo Actual</h3><div id="staff-admin-list" class="space-y-3"></div></div>`;
             container.innerHTML = html;
 
@@ -571,12 +596,26 @@
             const { start, end, interval, breakStart, breakEnd } = appState.settings.hours;
             container.innerHTML = `<h2 class="text-3xl font-display font-bold mb-6">Configurar Horarios</h2><div class="bg-white p-6 rounded-lg shadow"><form id="form-hours" class="space-y-4"><div class="grid grid-cols-2 gap-4"><div><label class="font-semibold">Hora de Apertura</label><input type="time" id="hours-start" value="${start}" class="w-full p-2 border rounded"></div><div><label class="font-semibold">Hora de Cierre</label><input type="time" id="hours-end" value="${end}" class="w-full p-2 border rounded"></div></div><div class="grid grid-cols-2 gap-4"><div><label class="font-semibold">Inicio del Descanso</label><input type="time" id="hours-break-start" value="${breakStart}" class="w-full p-2 border rounded"></div><div><label class="font-semibold">Fin del Descanso</label><input type="time" id="hours-break-end" value="${breakEnd}" class="w-full p-2 border rounded"></div></div><div><label class="font-semibold">Intervalo de citas (minutos)</label><input type="number" id="hours-interval" value="${interval}" class="w-full p-2 border rounded"></div><button type="submit" class="bg-green-500 text-white py-2 px-6 rounded hover:bg-green-600 font-bold">Guardar Horario</button></form></div>`;
         };
+        
+        // AÑADIDO: Función para renderizar la vista de cambio de contraseña
+        const renderAdminPassword = (container) => {
+            container.innerHTML = `
+                <h2 class="text-3xl font-display font-bold mb-6">Seguridad</h2>
+                <div class="bg-white p-8 rounded-lg shadow-lg max-w-lg mx-auto">
+                    <h3 class="font-semibold text-xl mb-2">Cambiar Contraseña</h3>
+                    <p class="text-gray-600 mb-6">Aquí puedes establecer una nueva contraseña para acceder al panel de administrador.</p>
+                    <button id="open-password-modal-btn" class="btn-primary w-full py-3 rounded-lg font-bold">Cambiar Contraseña</button>
+                </div>
+            `;
+        };
 
         document.getElementById('admin-view').addEventListener('click', (e) => {
             const target = e.target.closest('button');
             if (!target) return;
 
-            if (target.classList.contains('delete-appointment-btn')) {
+            if (target.id === 'open-password-modal-btn') {
+                document.getElementById('password-modal').classList.remove('hidden');
+            } else if (target.classList.contains('delete-appointment-btn')) {
                 showConfirm('Eliminar Cita', '¿Estás seguro de que quieres eliminar esta cita? Esta acción no se puede deshacer.', (confirmed) => {
                     if (confirmed) {
                         const { date, id } = target.dataset;
@@ -607,7 +646,7 @@
                 const id = parseInt(target.dataset.id);
                 const newStaff = appState.settings.staff.filter(s => s.id !== id);
                 settingsRef.child('staff').set(newStaff);
-                showNotification('Manicurista eliminada');
+                showNotification('Profesional eliminada');
             }
         });
 
@@ -691,6 +730,58 @@
             e.target.reset();
             showNotification('Cita agendada manualmente');
         });
+        
+        // AÑADIDO: Lógica para guardar la nueva contraseña
+        document.getElementById('save-password-btn').addEventListener('click', () => {
+            const newPass = document.getElementById('new-password').value;
+            const confirmPass = document.getElementById('confirm-password').value;
+            const errorEl = document.getElementById('password-error');
+            
+            errorEl.classList.add('hidden');
+
+            if (!newPass || !confirmPass) {
+                errorEl.textContent = 'Ambos campos son obligatorios.';
+                errorEl.classList.remove('hidden');
+                return;
+            }
+            if (newPass !== confirmPass) {
+                errorEl.textContent = 'Las contraseñas no coinciden.';
+                errorEl.classList.remove('hidden');
+                return;
+            }
+            if (newPass.length < 4) {
+                errorEl.textContent = 'La nueva contraseña debe tener al menos 4 caracteres.';
+                errorEl.classList.remove('hidden');
+                return;
+            }
+
+            // Guardar la contraseña en la ruta correcta: settings/password
+            settingsRef.child('password').set(newPass)
+                .then(() => {
+                    showNotification('La contraseña se ha cambiado correctamente.');
+                    document.getElementById('password-modal').classList.add('hidden');
+                })
+                .catch(err => {
+                    showNotification('Error: No se pudo guardar la nueva contraseña.', true);
+                });
+        });
+
+        // AÑADIDO: Lógica para el ícono de ojo y cierre de modal
+        document.getElementById('cancel-password-btn').onclick = () => document.getElementById('password-modal').classList.add('hidden');
+        
+        const togglePasswordVisibility = (e) => {
+            const icon = e.currentTarget.querySelector('i');
+            const input = e.currentTarget.previousElementSibling;
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = "password";
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        };
 
         const initializeApp = () => {
             settingsRef.on('value', (snapshot) => {
@@ -707,8 +798,8 @@
                     if (adminView.offsetParent !== null) {
                          const activeTab = document.querySelector('.admin-tab.active');
                          if (activeTab && activeTab.dataset.tab === 'agenda') {
-                            const datePicker = document.getElementById('admin-date-picker');
-                            renderAdminAgenda(document.getElementById('admin-content'), datePicker ? datePicker.value : null);
+                             const datePicker = document.getElementById('admin-date-picker');
+                             renderAdminAgenda(document.getElementById('admin-content'), datePicker ? datePicker.value : null);
                          }
                     }
                 });
@@ -718,6 +809,11 @@
                 } else {
                     showClientView();
                 }
+            });
+
+            // AÑADIDO: Asignar evento a los íconos de ojo
+            document.querySelectorAll('.toggle-password').forEach(el => {
+                el.addEventListener('click', togglePasswordVisibility);
             });
         };
         
